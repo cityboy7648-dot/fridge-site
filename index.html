@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>프리지 — 신선하게, 세대의 이야기를 잇다</title>
+
+<template id="__bundler_thumbnail" data-bg-color="#0A0A0A">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0A0A0A"/>
+    <text x="600" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="280" font-weight="900" fill="#FFFFFF" letter-spacing="-12">FR<tspan fill="#E91E63">.</tspan></text>
+    <text x="600" y="560" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" fill="#FFFFFF" opacity="0.5" letter-spacing="8">FRIDGE MAGAZINE</text>
+  </svg>
+</template>
+
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#E91E63",
+  "bg": "#FFFFFF",
+  "heroStyle": "editorial",
+  "fontHeadline": "sans"
+}/*EDITMODE-END*/;
+</script>
+
+<style>
+  :root{
+    --ink:#0A0A0A;
+    --paper:#FFFFFF;
+    --paper-2:#F4F4F4;
+    --accent:#00B894;
+    --muted:#6B6B66;
+    --line:rgba(10,10,10,.12);
+    --serif:'Pretendard Variable','Pretendard', ui-sans-serif, system-ui, sans-serif;
+    --sans:'Pretendard Variable','Pretendard', ui-sans-serif, system-ui, sans-serif;
+    --mono:'Pretendard Variable','Pretendard', ui-monospace, Menlo, monospace;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
+  body{overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+
+  /* cursor dot */
+  .cursor{position:fixed;top:0;left:0;width:10px;height:10px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:9999;mix-blend-mode:difference;transform:translate(-50%,-50%);transition:width .25s ease,height .25s ease,background .2s;}
+  .cursor.lg{width:56px;height:56px;background:var(--ink);}
+  @media (pointer:coarse){.cursor{display:none;}}
+
+  /* NAV */
+  nav.topnav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 32px;
+    color:#fff;
+    transition:color .4s, background .4s;
+  }
+  nav.topnav.is-light{color:#0A0A0A;}
+  nav.topnav.is-light .tabs{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12);}
+  nav.topnav.is-light .tab{color:#0A0A0A;}
+  nav.topnav.is-light .nav-meta a{border-color:rgba(0,0,0,.25)!important;color:#0A0A0A!important;}
+  nav.topnav.is-light .tab-pill{background:#0A0A0A;}
+  nav.topnav.is-light .tab.active{color:#fff;}
+  * {font-style: normal !important;}
+  nav.topnav .mark{font-family:var(--serif);font-size:28px;letter-spacing:-.02em;color:#fff;}
+  nav.topnav .mark b{font-style:normal;font-family:var(--sans);font-weight:900;letter-spacing:-.04em;}
+  .tabs{display:flex;gap:4px;background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px;}
+  .tab{
+    position:relative;padding:8px 18px;font-size:13px;font-weight:500;letter-spacing:.02em;
+    border-radius:999px;cursor:pointer;transition:color .3s;color:#fff;
+    text-transform:uppercase;font-family:var(--sans);
+  }
+  .tab .tab-pill{position:absolute;inset:0;background:#fff;border-radius:999px;z-index:-1;opacity:0;transform:scale(.8);transition:opacity .3s,transform .3s;box-shadow:0 2px 12px rgba(0,0,0,.15);}
+  .tab.active{color:#0A0A0A;isolation:isolate;mix-blend-mode:normal;}
+  .tab.active .tab-pill{opacity:1;transform:scale(1);}
+
+  .nav-meta{display:flex;gap:20px;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;opacity:.8;}
+  .nav-meta .dot{width:6px;height:6px;border-radius:50%;background:#8BE78B;box-shadow:0 0 10px #8BE78B;}
+
+  /* PAGE system */
+  .page{display:none;}
+  .page.active{display:block;animation:pagein .6s cubic-bezier(.2,.8,.2,1);}
+  @keyframes pagein{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+  /* HERO */
+  .hero{
+    position:relative;min-height:100vh;overflow:hidden;
+    background:var(--ink);color:#fff;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background:url('assets/hero-elderly.jpg') center/cover no-repeat;
+    filter:brightness(.55) saturate(.9);
+    z-index:0;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(to bottom, rgba(0,0,0,.35) 0%, rgba(0,0,0,.15) 40%, rgba(0,0,0,.55) 100%);
+    z-index:0;
+  }
+  .hero > *{position:relative;z-index:1;}
+  .hero-grid{
+    position:relative;padding:120px 48px 48px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-height:100vh;text-align:left;
+  }
+  .hero-title{
+    font-family:var(--serif);font-style:normal;
+    font-size:clamp(56px, 10vw, 160px);
+    line-height:.88;letter-spacing:-.04em;
+  }
+  .hero-sub{
+    margin-top:28px;font-family:var(--sans);font-size:clamp(16px,1.4vw,20px);
+    line-height:1.5;letter-spacing:-.01em;opacity:0;
+    animation:heroFade 2.2s cubic-bezier(.2,.9,.2,1) 1.2s forwards;
+    max-width:520px;font-weight:400;
+  }
+  .hero-title .line{display:block;}
+  .hero-title .line span{display:inline-block;opacity:0;animation:heroFade 2.2s cubic-bezier(.2,.9,.2,1) .3s forwards;}
+  .hero-title .line:nth-child(2) span{animation-delay:.15s;}
+  .hero-title .line:nth-child(3) span{animation-delay:.3s;}
+  @keyframes heroFade{
+    0%{opacity:0;filter:blur(24px);}
+    60%{opacity:.8;filter:blur(6px);}
+    100%{opacity:1;filter:blur(0);}
+  }
+
+  .hero-title .amp{color:var(--accent);font-family:var(--sans);font-weight:300;}
+  .hero-title .strike{text-decoration:line-through;text-decoration-thickness:4px;opacity:.55;}
+
+  .hero-meta{
+    position:absolute;top:120px;right:32px;text-align:right;
+    font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;opacity:.7;
+    line-height:1.8;
+  }
+  .hero-meta b{color:var(--accent);font-weight:400;}
+
+  .hero-tagline{
+    margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,.2);display:flex;gap:40px;align-items:center;justify-content:center;flex-wrap:wrap;
+  }
+  .hero-tagline .kr{font-family:var(--sans);font-size:18px;line-height:1.5;font-weight:400;}
+  .hero-tagline .en{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;}
+  .hero-tagline .center{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.5;}
+
+  .hero-img-stack{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:28vw;aspect-ratio:3/4;
+    border-radius:4px;overflow:hidden;
+  }
+  .hero-img-stack img{width:100%;height:100%;object-fit:cover;filter:grayscale(.1) contrast(1.05);}
+
+  .hero-marquee{
+    position:absolute;bottom:0;left:0;right:0;
+    padding:16px 0;border-top:1px solid rgba(255,255,255,.2);
+    overflow:hidden;white-space:nowrap;
+    font-family:var(--serif);font-size:48px;
+    display:flex;gap:40px;
+  }
+  .hero-marquee .track{display:flex;gap:40px;animation:marq 28s linear infinite;flex-shrink:0;}
+  .hero-marquee span{display:inline-flex;align-items:center;gap:40px;}
+  .hero-marquee .dot-sep{width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block;}
+  @keyframes marq{to{transform:translateX(-100%);}}
+
+  /* FEED SECTION */
+  .feed-section{padding:140px 32px 120px;background:var(--paper);}
+  .section-head{
+    display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;
+    margin-bottom:80px;
+  }
+  .section-eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  }
+  .section-eyebrow::before{content:"";width:40px;height:1px;background:currentColor;}
+  .section-title{
+    font-family:var(--serif);font-size:clamp(48px,7vw,120px);line-height:.95;letter-spacing:-.03em;
+  }
+  .section-title i{color:var(--accent);}
+  .section-sub{
+    font-family:var(--sans);font-size:18px;line-height:1.6;color:var(--ink);max-width:420px;align-self:end;
+  }
+
+  .feed-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  }
+  .feed-item{
+    position:relative;aspect-ratio:1;overflow:hidden;background:var(--paper-2);
+    cursor:pointer;border-radius:2px;
+  }
+  .feed-item img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.8,.2,1),filter .4s;}
+  .feed-item:hover img{transform:scale(1.06);}
+  .feed-item .overlay{
+    position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 55%);
+    opacity:0;transition:opacity .4s;
+    display:flex;flex-direction:column;justify-content:flex-end;padding:16px;color:#fff;
+  }
+  .feed-item:hover .overlay{opacity:1;}
+  .feed-item .caption{font-family:var(--serif);font-size:20px;line-height:1.1;}
+  .feed-item .meta{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;opacity:.8;margin-top:8px;}
+  .feed-item.wide{grid-column:span 2;aspect-ratio:2/1;}
+  .feed-item.tall{grid-row:span 2;aspect-ratio:1/2;}
+
+  .feed-item .heart{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:10px;color:#fff;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);padding:4px 8px;border-radius:999px;letter-spacing:.08em;}
+
+  /* WHAT WE DO */
+  .whatwedo{
+    padding:140px 32px;background:var(--paper);color:var(--ink);position:relative;overflow:hidden;
+  }
+  .whatwedo .bg-word{
+    position:absolute;left:-2vw;bottom:-4vw;font-family:var(--serif);
+    font-size:32vw;line-height:.8;color:rgba(0,0,0,.04);pointer-events:none;letter-spacing:-.04em;
+  }
+  .ww-head{max-width:900px;margin-bottom:100px;}
+  .ww-head h2{font-family:var(--serif);font-size:clamp(44px,6vw,96px);line-height:1;letter-spacing:-.02em;}
+  .ww-head h2 b{font-family:var(--sans);font-weight:900;font-style:normal;color:var(--accent);letter-spacing:-.04em;}
+
+  .ww-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(0,0,0,.12);border:1px solid rgba(0,0,0,.12);}
+  .ww-card{background:var(--paper);padding:40px 32px;min-height:360px;display:flex;flex-direction:column;justify-content:space-between;position:relative;transition:background .4s;}
+  .ww-card:hover{background:#f4f2ee;}
+  .ww-num{font-family:var(--mono);font-size:11px;letter-spacing:.1em;opacity:.55;}
+  .ww-card h3{font-family:var(--serif);font-size:40px;line-height:1;letter-spacing:-.02em;margin-top:40px;}
+  .ww-card h3 i{color:var(--accent);}
+  .ww-card p{font-family:var(--sans);font-size:14px;line-height:1.7;opacity:.7;margin-top:20px;}
+
+  /* BIG STATEMENT */
+  .statement{
+    padding:180px 32px;background:var(--paper);position:relative;
+  }
+  .statement-inner{
+    max-width:1400px;margin:0 auto;
+    font-family:var(--serif);font-size:clamp(48px,7vw,140px);line-height:.95;letter-spacing:-.03em;
+  }
+  .statement-inner .accent{color:var(--accent);}
+  .statement-inner .sk{font-family:var(--sans);font-weight:400;}
+  .statement-meta{
+    display:flex;justify-content:space-between;margin-top:80px;padding-top:40px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ABOUT PAGE */
+  .about-hero{
+    min-height:100vh;padding:160px 32px 80px;color:#fff;position:relative;overflow:hidden;display:flex;align-items:center;
+    background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.45) 60%, rgba(0,0,0,.75) 100%), url('assets/about-hero.jpg') center/cover no-repeat;
+  }
+  .about-hero-inner{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;width:100%;position:relative;z-index:2;}
+  .about-hero h1{font-family:var(--serif);font-size:clamp(56px,9vw,140px);line-height:1;letter-spacing:-.03em;white-space:nowrap;color:#fff;}
+  .about-hero h1 i{color:var(--accent);}
+  .about-hero .sub{font-family:var(--sans);font-size:20px;line-height:1.6;max-width:440px;justify-self:end;color:rgba(255,255,255,.92);}
+
+  .about-intro{padding:120px 32px;background:var(--paper);}
+  .about-intro-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start;}
+  .about-intro h2{font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-.02em;align-self:start;position:sticky;top:120px;}
+  .about-intro h2 i{color:var(--accent);}
+  #page-about i, #page-about em{font-style:normal;}
+  .about-intro-body p{font-family:var(--sans);font-size:20px;line-height:1.7;margin-bottom:24px;}
+  .about-intro-body p.big{font-family:var(--serif);font-size:36px;line-height:1.25;letter-spacing:-.01em;margin:40px 0;}
+  .about-intro-body p.big::before{content:"" "";font-family:var(--serif);color:var(--accent);}
+
+  .mission-blocks{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);margin-top:64px;border:1px solid var(--line);
+  }
+  .mission-block{background:var(--paper);padding:40px 28px;}
+  .mission-block .num{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.1em;}
+  .mission-block h4{font-family:var(--serif);font-size:28px;line-height:1.1;margin:24px 0 12px;letter-spacing:-.01em;}
+  .mission-block p{font-family:var(--sans);font-size:14px;line-height:1.7;color:var(--muted);}
+
+  /* TEAM */
+  .team-section{padding:120px 32px;background:var(--paper-2);}
+  .team-head{max-width:1400px;margin:0 auto 80px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;}
+  .team-head h2{font-family:var(--serif);font-size:clamp(56px,8vw,120px);line-height:.95;letter-spacing:-.03em;}
+  .team-head h2 i{color:var(--accent);}
+  .team-head .count{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right;}
+  .team-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  .team-card{background:var(--paper);border-radius:2px;overflow:hidden;transition:transform .4s;}
+  .team-card:hover{transform:translateY(-4px);}
+  .team-photo{aspect-ratio:3/4;background:var(--paper-2);position:relative;overflow:hidden;}
+  .team-photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.5) contrast(1.05);transition:filter .5s;}
+  .team-card:hover .team-photo img{filter:grayscale(0) contrast(1.05);}
+  .team-photo .badge{position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:10px;background:var(--ink);color:#fff;padding:4px 8px;letter-spacing:.1em;}
+  .team-info{padding:20px 4px;}
+  .team-info .role{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  .team-info .name{font-family:var(--serif);font-size:32px;line-height:1;letter-spacing:-.01em;margin-bottom:4px;}
+  .team-info .name .kr{font-family:var(--sans);font-weight:400;font-size:20px;margin-left:6px;color:var(--muted);}
+  .team-info .school{font-family:var(--sans);font-size:13px;color:var(--muted);font-weight:400;margin-top:6px;}
+
+  /* CONTACT */
+  .contact-hero{
+    min-height:100vh;padding:160px 32px 80px;color:#fff;position:relative;overflow:hidden;display:flex;align-items:center;
+    background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.78) 100%), url('assets/contact-hero.jpg') center/cover no-repeat;
+  }
+  .contact-hero-inner{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;width:100%;position:relative;z-index:2;}
+  .contact-hero h1{font-family:var(--serif);font-size:clamp(56px,9vw,140px);line-height:1;letter-spacing:-.03em;white-space:nowrap;color:#fff;}
+  .contact-hero .sub{font-family:var(--sans);font-size:20px;line-height:1.6;max-width:440px;justify-self:end;color:rgba(255,255,255,.92);}
+
+  .contact-body{padding:140px 32px;background:var(--paper);color:var(--ink);}
+  .contact-body-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1.2fr;gap:120px;align-items:start;}
+  .contact-intro .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;}
+  .contact-intro h2{font-family:var(--serif);font-size:clamp(44px,5.5vw,80px);line-height:1;letter-spacing:-.02em;margin-bottom:32px;}
+  .contact-intro h2 i{color:var(--accent);font-style:normal;}
+  .contact-intro p{font-family:var(--sans);font-size:17px;line-height:1.75;color:var(--muted);max-width:440px;}
+
+  .contact-rows{display:flex;flex-direction:column;border-top:1px solid rgba(0,0,0,.14);}
+  .c-row{display:grid;grid-template-columns:1fr 2fr;align-items:center;gap:32px;padding:36px 8px;border-bottom:1px solid rgba(0,0,0,.14);transition:padding .3s, background .3s;color:var(--ink);}
+  .c-row:hover{padding-left:24px;background:rgba(0,0,0,.02);}
+  .c-row-left{display:flex;align-items:baseline;gap:20px;}
+  .c-num{font-family:var(--mono);font-size:11px;letter-spacing:.15em;color:var(--muted);}
+  .c-label{font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+  .c-row-right{display:flex;align-items:center;justify-content:space-between;gap:24px;}
+  .c-val{font-family:var(--serif);font-size:clamp(24px,2.4vw,36px);letter-spacing:-.01em;line-height:1.1;}
+  .c-arrow{font-family:var(--sans);font-size:24px;font-weight:300;opacity:.5;transition:transform .3s, opacity .3s;}
+  .c-row:hover .c-arrow{transform:translateX(6px);opacity:1;color:var(--accent);}
+  .c-row:hover .c-val{color:var(--accent);}
+
+  /* legacy (still used by some JS references) */
+  .contact-page{min-height:100vh;background:var(--paper);color:var(--ink);padding:160px 32px 80px;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+  .contact-inner{max-width:1600px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .contact-inner h1{font-family:var(--serif);font-size:clamp(80px,14vw,240px);line-height:.9;letter-spacing:-.03em;}
+  .contact-inner h1 i{color:var(--accent);}
+  .contact-big-mail{
+    font-family:var(--serif);font-size:clamp(40px,7vw,120px);line-height:1;letter-spacing:-.02em;
+    border-bottom:2px solid rgba(0,0,0,.2);padding:40px 0 24px;margin-top:40px;
+    display:block;transition:color .3s;word-break:break-all;
+  }
+  .contact-big-mail:hover{color:var(--accent);}
+  .contact-big-mail::after{content:" →";font-style:normal;font-family:var(--sans);font-weight:300;display:inline-block;transition:transform .3s;}
+  .contact-big-mail:hover::after{transform:translate(8px,-4px);}
+
+  .contact-links{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:80px;padding-top:40px;border-top:1px solid rgba(0,0,0,.15);}
+  .contact-link .label{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.55;margin-bottom:12px;}
+  .contact-link .val{font-family:var(--serif);font-size:32px;letter-spacing:-.01em;line-height:1.1;}
+  .contact-link .val a{border-bottom:1px solid rgba(0,0,0,.2);padding-bottom:2px;}
+  .contact-link .val a:hover{color:var(--accent);border-color:var(--accent);}
+
+  .contact-bg-word{
+    position:absolute;bottom:-8vw;right:-4vw;font-family:var(--serif);
+    font-size:42vw;line-height:.8;color:rgba(255,255,255,.03);pointer-events:none;letter-spacing:-.04em;
+  }
+
+  /* FOOTER */
+  footer{background:var(--paper);color:var(--ink);padding:80px 32px 32px;border-top:1px solid rgba(0,0,0,.1);}
+  .foot-grid{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:60px;border-bottom:1px solid rgba(0,0,0,.1);}
+  .foot-mark{font-family:var(--serif);font-size:64px;line-height:.9;letter-spacing:-.02em;}
+  .foot-mark b{font-family:var(--sans);font-weight:900;letter-spacing:-.04em;}
+  .foot-mark i{color:var(--accent);}
+  .foot-col h5{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.55;margin-bottom:16px;}
+  .foot-col a{display:block;padding:6px 0;font-size:14px;opacity:.85;transition:opacity .2s;color:var(--ink);}
+  .foot-col a:hover{opacity:1;color:var(--accent);}
+  .foot-bot{max-width:1600px;margin:32px auto 0;display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;}
+
+  /* scroll reveal */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  /* TWEAKS panel */
+  .tweaks-panel{
+    position:fixed;bottom:24px;right:24px;z-index:200;
+    background:var(--ink);color:#fff;border-radius:16px;padding:20px;width:280px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);display:none;font-family:var(--sans);
+  }
+  .tweaks-panel.show{display:block;}
+  .tweaks-panel h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px;opacity:.7;}
+  .tweaks-row{margin-bottom:18px;}
+  .tweaks-row label{font-size:11px;font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase;opacity:.6;display:block;margin-bottom:8px;}
+  .tweaks-row .swatches{display:flex;gap:6px;flex-wrap:wrap;}
+  .tweaks-row .sw{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .2s;}
+  .tweaks-row .sw:hover{transform:scale(1.1);}
+  .tweaks-row .sw.active{border-color:#fff;}
+  .tweaks-row .btns{display:flex;gap:4px;flex-wrap:wrap;}
+  .tweaks-row .btn{padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.08);font-size:11px;cursor:pointer;border:1px solid transparent;transition:background .2s;font-family:var(--mono);letter-spacing:.05em;}
+  .tweaks-row .btn.active{background:#fff;color:#000;}
+
+  /* responsive */
+  @media(max-width:960px){
+    .hero-grid, .section-head, .ww-grid, .team-grid, .feed-grid, .contact-links, .about-intro-grid, .about-hero-inner, .team-head, .mission-blocks, .foot-grid{grid-template-columns:1fr !important;}
+    .hero-meta{position:static;text-align:left;margin-top:20px;}
+    .feed-item.wide, .feed-item.tall{grid-column:auto;grid-row:auto;aspect-ratio:1;}
+    nav.topnav{padding:16px 20px;}
+    .nav-meta{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<nav class="topnav">
+  <div class="mark"><b>FR</b>idge<i style="color:var(--accent);">·</i></div>
+  <div class="tabs" role="tablist">
+    <div class="tab active" data-tab="home"><span class="tab-pill"></span>Home</div>
+    <div class="tab" data-tab="about"><span class="tab-pill"></span>About</div>
+    <div class="tab" data-tab="contact"><span class="tab-pill"></span>Contact</div>
+  </div>
+  <div class="nav-meta">
+    <a href="https://instagram.com/fridge.zip" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid rgba(255,255,255,.3);border-radius:999px;text-decoration:none;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,border-color .2s;" onmouseover="this.style.background='#fff';this.style.color='#000';" onmouseout="this.style.background='transparent';this.style.color='#fff';">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+      @fridge.zip
+    </a>
+  </div>
+</nav>
+
+<!-- ======================== HOME ======================== -->
+<main id="page-home" class="page active">
+
+  <section class="hero">
+    <div class="hero-meta" style="display:none;">
+      <div>창간 <b>2026</b></div>
+      <div>서울 — 대한민국</div>
+      <div><b>2030</b>을 위한 매거진</div>
+      <div><b>6070</b>이 주인공</div>
+    </div>
+
+    <div class="hero-img-stack" style="display:none;">
+      <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1400&auto=format&fit=crop" alt="model"/>
+    </div>
+
+    <div class="hero-grid">
+      <h1 class="hero-title">
+        <div class="line"><span>Fridge</span></div>
+      </h1>
+      <p class="hero-sub">신선하게, 세대의 이야기를 잇습니다.</p>
+    </div>
+
+  </section>
+
+  <!-- FEED -->
+  <section class="feed-section">
+    <div class="section-head reveal">
+      <div>
+        <h2 class="section-title">우리의 이야기.</h2>
+      </div>
+      <p class="section-sub">우리의 인스타그램 피드는 한 권의 매거진입니다. 시니어 모델이 주인공이 되는, 2030을 위한 시각적 아카이브.</p>
+    </div>
+
+    <div class="feed-grid">
+      <div class="feed-item tall reveal">
+        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop" alt=""/>
+        <div class="heart">♡ 12.4k</div>
+        <div class="overlay">
+          <div class="meta">7호 · 커버</div>
+          <div class="caption">할머니의 여름, <i>다시 오다</i></div>
+        </div>
+      </div>
+      <div class="feed-item reveal">
+        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop" alt=""/>
+        <div class="heart">♡ 8.2k</div>
+        <div class="overlay"><div class="meta">에디토리얼</div><div class="caption">할머니의 <i>데님</i></div></div>
+      </div>
+      <div class="feed-item reveal">
+        <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=600&auto=format&fit=crop" alt=""/>
+        <div class="heart">♡ 5.1k</div>
+        <div class="overlay"><div class="meta">인터뷰</div><div class="caption">71세, <i>모델 데뷔</i></div></div>
+      </div>
+      <div class="feed-item wide reveal">
+        <img src="https://images.unsplash.com/photo-1506634572416-48cdfe530110?q=80&w=1200&auto=format&fit=crop" alt=""/>
+        <div class="heart">♡ 21.0k</div>
+        <div class="overlay"><div class="meta">커버 스토리</div><div class="caption">세대가 <i>만나는 자리</i></div></div>
+      </div>
+      <div class="feed-item reveal">
+        <img src="https://images.unsplash.com/photo-1541534401786-2077eed87a74?q=80&w=600&auto=format&fit=crop" alt=""/>
+        <div class="heart">♡ 3.7k</div>
+        <div class="overlay"><div class="meta">비하인드</div><div class="caption">촬영장 <i>스케치</i></div></div>
+      </div>
+      <div class="feed-item reveal">
+        <img src="https://images.unsplash.com/photo-1581579186913-45ac3e6efe93?q=80&w=600&auto=format&fit=crop" alt=""/>
+        <div class="heart">♡ 9.9k</div>
+        <div class="overlay"><div class="meta">스타일</div><div class="caption">은발, <i>가장 큰소리</i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE DO section removed -->
+
+  <!-- STATEMENT -->
+  <section class="statement" style="display:none;">
+    <div class="statement-inner reveal">
+      <span class="sk">오래된 것은</span><br/>
+      <span class="accent">결코</span> 낡지 않는다<span style="opacity:.4;"> — </span><br/>
+      <span class="sk">언제나</span> <i>신선하다</i>.
+    </div>
+    <div class="statement-meta" style="display:none;">
+      <span>— 프리지 편집 선언</span>
+      <span>서울 · 2026</span>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================== ABOUT ======================== -->
+<main id="page-about" class="page">
+  <section class="about-hero">
+    <div class="about-hero-inner">
+      <h1><i>About</i> Fridge.</h1>
+      <p class="sub">냉장고는 신선한 것을 보관하는 곳. 우리는 <i>세대의 이야기</i>를 그렇게 보관하고, 새로 꺼내어 전합니다.</p>
+    </div>
+  </section>
+
+  <section class="about-intro">
+    <div class="about-intro-grid">
+      <h2>Fridge<br/><i>프로젝트</i> 소개.</h2>
+      <div class="about-intro-body reveal">
+        <p class="big">"냉장고(Fridge)와 다리(Bridge), 신선하게 세대의 이야기를 잇다."</p>
+        <p>시니어를 '어르신'이 아닌 <b>모델</b>로, 과거의 이야기가 아닌 <b>지금의 스타일</b>로 다룹니다. 우리가 보기에, 그들이 가진 시간과 태도는 어떤 2030보다도 힙합니다.</p>
+        <p>매주 한 편의 에디토리얼, 매월 한 권의 디지털 이슈. @fridge.zip 에서, 가장 신선하게.</p>
+      </div>
+    </div>
+
+    <div class="mission-blocks">
+      <div class="mission-block reveal">
+        <div class="num">01</div>
+        <h4>우리는 <i style="color:var(--accent);">비영리</i> 단체입니다.</h4>
+        <p>수익을 위해 움직이지 않습니다. 세대를 잇는 일 자체가 목적입니다.</p>
+      </div>
+      <div class="mission-block reveal">
+        <div class="num">02</div>
+        <h4>연세대 <i style="color:var(--accent);">IHEI Workstation</i> 프로젝트.</h4>
+        <p>연세대학교 Institute of Higher Education Innovation의 Workstation 프로그램에서 시작된 학생 주도 프로젝트입니다.</p>
+      </div>
+      <div class="mission-block reveal">
+        <div class="num">03</div>
+        <h4>시니어에게 <i style="color:var(--accent);">수익 환원</i>.</h4>
+        <p>콘텐츠로 발생한 수익은 출연한 시니어와 그 세대가 쉴 수 있는 공간으로 돌아갑니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM section removed -->
+</main>
+
+<!-- ======================== CONTACT ======================== -->
+<main id="page-contact" class="page">
+  <section class="contact-hero">
+    <div class="contact-hero-inner">
+      <h1>Contact.</h1>
+      <p class="sub">냉장고 문을 두드리는 모든 순간을 환영합니다. 이야기의 씨앗 하나가, 새로운 호를 만들어냅니다.</p>
+    </div>
+  </section>
+
+  <section class="contact-body">
+    <div class="contact-body-inner">
+      <div class="contact-intro reveal">
+        <div class="eyebrow">함께 만들고 싶다면</div>
+        <h2>우리에게<br/><i>말을 걸어주세요</i>.</h2>
+        <p>취재 제안, 인터뷰이 추천, 협업 · 제휴, 스폰서십, 그리고 Fridge에 에디터로 합류하고 싶은 분들까지. 한 줄이어도 좋습니다. 우리는 모든 메시지를 읽습니다.</p>
+      </div>
+
+      <div class="contact-rows">
+        <a class="c-row reveal" href="mailto:fridge2026@gmail.com">
+          <div class="c-row-left">
+            <div class="c-num">01</div>
+            <div class="c-label">이메일</div>
+          </div>
+          <div class="c-row-right">
+            <div class="c-val">fridge2026@gmail.com</div>
+            <div class="c-arrow">→</div>
+          </div>
+        </a>
+        <a class="c-row reveal" href="https://instagram.com/fridge.zip" target="_blank">
+          <div class="c-row-left">
+            <div class="c-num">02</div>
+            <div class="c-label">인스타그램</div>
+          </div>
+          <div class="c-row-right">
+            <div class="c-val">@fridge.zip</div>
+            <div class="c-arrow">→</div>
+          </div>
+        </a>
+        <div class="c-row reveal" style="cursor:default;display:none;">
+          <div class="c-row-left">
+            <div class="c-num">03</div>
+            <div class="c-label">위치</div>
+          </div>
+          <div class="c-row-right">
+            <div class="c-val">서울, 대한민국</div>
+            <div class="c-arrow" style="opacity:.2;">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-mark"><b>FR</b>idge<i style="color:var(--accent);font-style:normal;">·</i></div>
+    <div class="foot-col">
+      <h5>사이트</h5>
+      <a data-tab="home" class="foot-tab">Home</a>
+      <a data-tab="about" class="foot-tab">About</a>
+      <a data-tab="contact" class="foot-tab">Contact</a>
+    </div>
+    <div class="foot-col">
+      <h5>소셜</h5>
+      <a href="https://instagram.com/fridge.zip" target="_blank">인스타그램</a>
+      <a href="mailto:fridge2026@gmail.com">이메일</a>
+    </div>
+    <div class="foot-col">
+      <h5>판권</h5>
+      <a>서체 · Noto KR</a>
+      <a>디지털 매거진</a>
+      <a>7호 · 2026</a>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <span>© 2026 프리지 — 신선하게, 세대의 이야기를 잇다.</span>
+    <span>서울 · 대한민국</span>
+  </div>
+</footer>
+
+<!-- Tweaks panel -->
+<div class="tweaks-panel" id="tweaksPanel">
+  <h4>트윅 ⚙</h4>
+  <div class="tweaks-row">
+    <label>포인트 컬러</label>
+    <div class="swatches" id="accentSw">
+      <div class="sw" data-color="#3B5BFF" style="background:#3B5BFF"></div>
+      <div class="sw" data-color="#FF4D1F" style="background:#FF4D1F"></div>
+      <div class="sw" data-color="#00B894" style="background:#00B894"></div>
+      <div class="sw" data-color="#FFB800" style="background:#FFB800"></div>
+      <div class="sw" data-color="#E91E63" style="background:#E91E63"></div>
+      <div class="sw" data-color="#6C5CE7" style="background:#6C5CE7"></div>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <label>배경 톤</label>
+    <div class="btns" id="bgBtns">
+      <div class="btn" data-bg="#F4F3EE" data-bg2="#EAE8DF">크림</div>
+      <div class="btn" data-bg="#FFFFFF" data-bg2="#F0F0F0">화이트</div>
+      <div class="btn" data-bg="#F5F1E8" data-bg2="#E8E2D0">웜</div>
+      <div class="btn" data-bg="#EFEFEA" data-bg2="#E0E0D8">그레이</div>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <label>제목 서체</label>
+    <div class="btns" id="fontBtns">
+      <div class="btn" data-font="serif">명조</div>
+      <div class="btn" data-font="sans">고딕</div>
+      <div class="btn" data-font="mono">모노</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ----- Tabs ---------------------------------------
+  const tabs = document.querySelectorAll('.tab');
+  const pages = {
+    home: document.getElementById('page-home'),
+    about: document.getElementById('page-about'),
+    contact: document.getElementById('page-contact'),
+  };
+  function goTab(name){
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+    Object.keys(pages).forEach(k=>pages[k].classList.toggle('active', k===name));
+    window.scrollTo({top:0, behavior:'instant'});
+    localStorage.setItem('fridge.tab', name);
+    // re-trigger reveal
+    setTimeout(initReveal, 50);
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>goTab(t.dataset.tab)));
+  document.querySelectorAll('.foot-tab').forEach(a=>a.addEventListener('click', ()=>goTab(a.dataset.tab)));
+  const startTab = localStorage.getItem('fridge.tab') || 'home';
+  goTab(startTab);
+
+  // ----- Nav color (light on white bg) ------------
+  const nav = document.querySelector('nav.topnav');
+  function updateNavColor(){
+    const activePage = document.querySelector('.page.active');
+    if(!activePage){ nav.classList.remove('is-light'); return; }
+    // Find the first dark hero-like section in the active page
+    const darkHero = activePage.querySelector('.hero, .about-hero, .contact-hero');
+    if(!darkHero){ nav.classList.add('is-light'); return; }
+    const rect = darkHero.getBoundingClientRect();
+    const navH = nav.offsetHeight;
+    // Nav is "over" the dark hero if the hero still covers the nav area
+    const onDark = rect.bottom > navH * 0.8;
+    nav.classList.toggle('is-light', !onDark);
+  }
+  window.addEventListener('scroll', updateNavColor, {passive:true});
+  window.addEventListener('resize', updateNavColor);
+  tabs.forEach(t=>t.addEventListener('click', ()=>setTimeout(updateNavColor, 60)));
+  document.querySelectorAll('.foot-tab').forEach(a=>a.addEventListener('click', ()=>setTimeout(updateNavColor, 60)));
+  setTimeout(updateNavColor, 50);
+
+  // ----- Reveal on scroll ---------------------------
+  let io;
+  function initReveal(){
+    if(io) io.disconnect();
+    const els = document.querySelectorAll('.page.active .reveal');
+    els.forEach(e=>e.classList.remove('in'));
+    io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    },{threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(e=>io.observe(e));
+  }
+  initReveal();
+
+  // ----- Cursor -------------------------------------
+  const cursor = document.getElementById('cursor');
+  let cx=0,cy=0,tx=0,ty=0;
+  window.addEventListener('mousemove',(e)=>{tx=e.clientX;ty=e.clientY;});
+  (function raf(){
+    cx += (tx-cx)*.2; cy += (ty-cy)*.2;
+    cursor.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+    requestAnimationFrame(raf);
+  })();
+  document.querySelectorAll('a, .tab, .feed-item, .team-card, .contact-big-mail, .sw, .btn').forEach(el=>{
+    el.addEventListener('mouseenter',()=>cursor.classList.add('lg'));
+    el.addEventListener('mouseleave',()=>cursor.classList.remove('lg'));
+  });
+
+  // ----- Tweaks -------------------------------------
+  const tweaksPanel = document.getElementById('tweaksPanel');
+  const state = {...TWEAK_DEFAULTS};
+
+  function applyState(){
+    document.documentElement.style.setProperty('--accent', state.accent);
+    document.documentElement.style.setProperty('--paper', state.bg);
+    // paper-2 tone derivative
+    // find matching button to get paper-2
+    const bgBtn = [...document.querySelectorAll('#bgBtns .btn')].find(b=>b.dataset.bg===state.bg);
+    if(bgBtn) document.documentElement.style.setProperty('--paper-2', bgBtn.dataset.bg2);
+
+    // font
+    const map = {serif:'var(--serif)', sans:'var(--sans)', mono:'var(--mono)'};
+    document.querySelectorAll('.hero-title, .section-title, .about-hero h1, .contact-inner h1, .team-head h2, .about-intro h2, .ww-head h2, .statement-inner').forEach(el=>{
+      el.style.fontFamily = map[state.fontHeadline] || 'var(--serif)';
+    });
+
+    // update active states
+    document.querySelectorAll('#accentSw .sw').forEach(s=>s.classList.toggle('active', s.dataset.color===state.accent));
+    document.querySelectorAll('#bgBtns .btn').forEach(b=>b.classList.toggle('active', b.dataset.bg===state.bg));
+    document.querySelectorAll('#fontBtns .btn').forEach(b=>b.classList.toggle('active', b.dataset.font===state.fontHeadline));
+  }
+
+  document.querySelectorAll('#accentSw .sw').forEach(sw=>{
+    sw.addEventListener('click',()=>{ state.accent=sw.dataset.color; applyState(); persist(); });
+  });
+  document.querySelectorAll('#bgBtns .btn').forEach(b=>{
+    b.addEventListener('click',()=>{ state.bg=b.dataset.bg; applyState(); persist(); });
+  });
+  document.querySelectorAll('#fontBtns .btn').forEach(b=>{
+    b.addEventListener('click',()=>{ state.fontHeadline=b.dataset.font; applyState(); persist(); });
+  });
+
+  function persist(){
+    try{
+      window.parent.postMessage({type:'__edit_mode_set_keys', edits:{accent:state.accent, bg:state.bg, heroStyle:state.heroStyle, fontHeadline:state.fontHeadline}}, '*');
+    }catch(e){}
+  }
+
+  applyState();
+
+  // ----- Edit mode wiring (register listener FIRST, then announce) ---
+  window.addEventListener('message', (e)=>{
+    const d = e.data || {};
+    if(d.type === '__activate_edit_mode'){ tweaksPanel.classList.add('show'); }
+    if(d.type === '__deactivate_edit_mode'){ tweaksPanel.classList.remove('show'); }
+  });
+  try{ window.parent.postMessage({type:'__edit_mode_available'}, '*'); }catch(e){}
+</script>
+</body>
+</html>
