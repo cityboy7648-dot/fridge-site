@@ -726,7 +726,12 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 
   // ----- Instagram feed via Behold.so ---------------
   const BEHOLD_FEED_ID = 'cEIIcTiHyu43iSi8Zgh0'; // public; safe in source
-  const BEHOLD_LAYOUT = ['tall', '', '', 'wide', '', ''];
+  // Magazine-style tall/wide slots only when we have enough posts to fill them
+  // (Instagram's default 1:1 gets distorted when forced into 1:2 or 2:1).
+  const BEHOLD_LAYOUT_FULL = ['tall', '', '', 'wide', '', ''];
+  function beholdLayoutFor(total, i){
+    return total >= 6 ? (BEHOLD_LAYOUT_FULL[i] || '') : '';
+  }
 
   function extractCaption(raw){
     if(!raw) return '';
@@ -736,7 +741,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   }
   function escAttr(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  function renderBeholdItem(post, i){
+  function renderBeholdItem(post, i, total){
     const s = post.sizes || {};
     const src = (post.mediaType === 'VIDEO' && post.thumbnailUrl)
       || (s.medium && s.medium.mediaUrl) || post.mediaUrl;
@@ -746,7 +751,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
       s.large  && `${s.large.mediaUrl} 1080w`,
     ].filter(Boolean).join(', ');
     const caption = extractCaption(post.caption) || `@fridge.zip ${i+1}번째 게시물`;
-    const layout = BEHOLD_LAYOUT[i] || '';
+    const layout = beholdLayoutFor(total, i);
     const loadAttrs = i === 0
       ? 'loading="eager" fetchpriority="high"'
       : 'loading="lazy" decoding="async"';
@@ -768,7 +773,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
       const data = await r.json();
       const posts = (data.posts || []).slice(0, 6);
       if(!posts.length) throw new Error('no posts');
-      grid.innerHTML = posts.map(renderBeholdItem).join('');
+      grid.innerHTML = posts.map((p,i)=>renderBeholdItem(p,i,posts.length)).join('');
       initReveal();
       bindCursorHovers();
     }catch(e){
